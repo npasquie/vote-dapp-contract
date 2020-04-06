@@ -11,8 +11,8 @@ contract Ballot {
     bool externalitiesEnabled; //to create ballots without controversial externalities
     uint numberOfCandidates; //actually useful
     mapping (uint => s_candidate) m_candidates; //id to candidates
-    mapping (uint => uint) m_candidate_poll; //candidate id to his number of votes
-    mapping (uint => uint) m_candidate_externality; /* candidate id to the sum of his externalities,
+    mapping (uint => uint) m_candidatePoll; //candidate id to his number of votes
+    mapping (uint => uint) m_candidateExternality; /* candidate id to the sum of his externalities,
     for penalties or bonus, often used at ISEP */
 
     //structs definition
@@ -89,11 +89,19 @@ contract Ballot {
     //public methods
     //getters
     function getCandidateScore(uint _candidateId) public view returns(uint){
-        return m_candidate_poll[_candidateId] + m_candidate_externality[_candidateId];
+        return m_candidatePoll[_candidateId] + m_candidateExternality[_candidateId];
     }
 
     function getCandidateExternality(uint _candidateId) public view returns(uint){
-        return m_candidate_externality[_candidateId];
+        return m_candidateExternality[_candidateId];
+    }
+
+    function getCandidateName(uint _candidateId) public view returns(bytes32){
+        return m_candidates[_candidateId].name;
+    }
+
+    function getCandidatePictureHash(uint _candidateId) public view returns(bytes32){
+        return m_candidates[_candidateId].pictureHash;
     }
 
     /* in front, use this value to request every candidate score
@@ -121,7 +129,7 @@ contract Ballot {
         require(m_voterIsAllowed[voterCodeHash], "you must be allowed to vote");
         require(! m_voterHasVotedWithCodeHash[voterCodeHash], "you can only vote once");
 
-        m_candidate_poll[_candidateId]++;
+        m_candidatePoll[_candidateId]++;
         m_voterHasVotedWithCodeHash[keccak256(_voterCode)] = true;
     }
 
@@ -129,6 +137,6 @@ contract Ballot {
     function addNewExternality(uint _candidateId, uint _externality) checksCandidateId onlyOwner public{
         require(externalitiesEnabled, "externalities must be enabled at ballot creation");
 
-        m_candidate_externality[_candidateId] += _externality;
+        m_candidateExternality[_candidateId] += _externality;
     }
 }
