@@ -5,6 +5,7 @@ pragma solidity >=0.4.22 <0.6.0;
  s_<var_name> for structs
  m_<var_name> for mappings
  _<var_name> for parameters
+ may use a convention for arrays in the future
  */
 
 contract Ballot {
@@ -13,43 +14,42 @@ contract Ballot {
     bytes32 name;
     bytes32 question;
     uint endTime; //time after which no vote can be registered anymore, based on unix epoch
-    mapping (bytes32 => bool) m_voterHasVotedWithCodeHash; //hash of the voter's secret code => status (voted or not)
-    mapping (bytes32 => bool) m_voterIsAllowed; //hash of the voter's secret code => status (can vote or not)
+    mapping (bytes32 => bool) m_voterHasNotYetVotedWithCodeHash;/* turns true in constructor for allowed voters,
+    false after vote */
+
     bool externalitiesEnabled; //to create ballots without controversial externalities
-    uint numberOfCandidates; //actually useful
-    mapping (uint => s_candidate) m_candidates; //id to candidates
-    mapping (uint => uint) m_candidatePoll; //candidate id to his number of votes
-    mapping (uint => uint) m_candidateExternality; /* candidate id to the sum of his externalities,
-    for penalties or bonus, often used at ISEP */
+    bytes32[] candidateNames;
+    mapping (bytes32 => s_candidate) m_candidates;
 
     //structs definition
     struct s_candidate {
-        bytes32 name;
+        uint poll; //number of votes
+        uint externality; //for penalties or bonus, often used at ISEP
         bytes32 pictureHash; //optional
     }
 
-    constructor(bytes32 _name, bytes32 _question, uint _endTime, bytes32[] _votersHashes, bool _externalitiesEnabled,
-        s_candidate[] _candidates) public {
-        require(! _name[0] == 0 && ! _question[0] == 0, "name and question must be defined");
+    //warning : if many candidates with the same name are sent, last one will overwrite the others
+    constructor(bytes32 _name, bytes32 _question, uint _endTime, bytes32[] memory _votersCodeHashes,
+        bool _externalitiesEnabled, bytes32[] memory _pictureHashes, bytes32[] memory _candidateNames) public {
+        require(! (_name[0] == 0) && ! (_question[0] == 0), "name and question must be defined");
         require(_endTime > now, "end time of the ballot must be in the future");
-        require(_votersHashes.length >= 2, "no ballot can be created with less than 2 candidates");
-        require(! containsIdenticalNames(_candidates), "every candidate's names must be distinct");
-        require(! containsIdenticalValues(_votersHashes), "each voter's hashes must bes distinct");
+        require(_candidateNames.length >= 2, "no ballot can be created with less than 2 candidates");
 
         owner = msg.sender;
         name = _name;
         question = _question;
         endTime = _endTime;
-        for (uint i = 0; i < _votersHashes.length; i++){
-            m_voterIsAllowed[_votersHashes[i]] = true;
-        }
         externalitiesEnabled = _externalitiesEnabled;
-        numberOfCandidates = 0; //used as iterator, last value after last while loop will be correct
-        while (numberOfCandidates < _candidates.length){
-            require(_candidates[numberOfCandidates].name[0] != 0, "every candidate must have a defined name");
+        for (uint i = 0; i < _votersCodeHashes.length; i++){
+            require(! m_voterHasNotYetVotedWithCodeHash[_votersCodeHashes[i]], "each voter's hashes must bes distinct");
 
-            m_candidates[numberOfCandidates] = _candidates[numberOfCandidates];
-            numberOfCandidates++;
+            m_voterHasNotYetVotedWithCodeHash[_votersCodeHashes[i]] = true;
+        }
+        for (uint i = 0; i < _candidateNames.length; i++){
+            require(_candidateNames[i][0] != 0, "every candidate must have a defined name");
+
+            candidateNames[i] = _candidateNames[i];
+            m_candidates[_candidateNames[i]].pictureHash = _pictureHashes[i];
         }
     }
 
@@ -58,63 +58,31 @@ contract Ballot {
     //modifiers
     modifier onlyOwner(){
         require(msg.sender == owner, "function reserved to the contract owner");
+        _;
     }
 
     modifier mustBeBeforeEndTime(){
         require(now < endTime, "ballot must still be open");
-    }
-
-    modifier checksCandidateId(uint _candidateId){
-        require(_candidateId < numberOfCandidates, "candidate id must exist");
-    }
-
-    // functions used in constructor checks
-    function containsIdenticalNames(s_candidate[] memory _candidates) private pure returns(bool){
-        mapping (bytes32 => bool) memory m_names;
-
-        for(uint i = 0; i < _candidates.length; i++){
-            if(m_names[_candidates[i].name]){
-                return true;
-            }
-            m_names[_candidates[i].name] = true;
-        }
-        return false;
-    }
-
-    function containsIdenticalValues(bytes32[] memory values) private pure returns(bool){
-        mapping (bytes32 => bool) memory m_valueIsUsed;
-
-        for(uint i = 0; i < values.length; i++){
-            if(m_valueIsUsed[values[i]]){
-                return true;
-            }
-            m_valueIsUsed[values[i]] = true;
-        }
-        return false;
+        _;
     }
 
     //public methods
+
     //getters
-    function getCandidateScore(uint _candidateId) public view returns(uint){
-        return m_candidatePoll[_candidateId] + m_candidateExternality[_candidateId];
+    function getCandidateScore(bytes32 _candidateName) public view returns(uint){
+        return m_candidates[_candidateName].poll + m_candidates[_candidateName].externality;
     }
 
-    function getCandidateExternality(uint _candidateId) public view returns(uint){
-        return m_candidateExternality[_candidateId];
+    function getCandidateExternality(bytes32 _candidateName) public view returns(uint){
+        return m_candidates[_candidateName].externality;
     }
 
-    function getCandidateName(uint _candidateId) public view returns(bytes32){
-        return m_candidates[_candidateId].name;
+    function getCandidateNames() public view returns(bytes32[] memory){
+        return candidateNames;
     }
 
-    function getCandidatePictureHash(uint _candidateId) public view returns(bytes32){
-        return m_candidates[_candidateId].pictureHash;
-    }
-
-    /* in front, use this value to request every candidate score
-    no function "getAllCandidates" is implemented to save gas */
-    function getNumberOfCandidates() public view returns(uint){
-        return numberOfCandidates;
+    function getCandidatePictureHash(bytes32 _candidateName) public view returns(bytes32){
+        return m_candidates[_candidateName].pictureHash;
     }
 
     function getEndTime() public view returns(uint){
@@ -130,20 +98,22 @@ contract Ballot {
     }
 
     //for voters
-    function vote(uint _candidateId, bytes32 _voterCode) checksCandidateId mustBeBeforeEndTime public{
-        bytes32 memory voterCodeHash = keccak256(_voterCode);
 
-        require(m_voterIsAllowed[voterCodeHash], "you must be allowed to vote");
-        require(! m_voterHasVotedWithCodeHash[voterCodeHash], "you can only vote once");
+    //warning: doesn't check if candidate actually exists
+    function vote(bytes32 _candidateName, bytes32 _voterCode) mustBeBeforeEndTime public{
+        bytes32 voterCodeHash = keccak256(abi.encodePacked(_voterCode));
 
-        m_candidatePoll[_candidateId]++;
-        m_voterHasVotedWithCodeHash[keccak256(_voterCode)] = true;
+        require(m_voterHasNotYetVotedWithCodeHash[voterCodeHash],
+            "you must be allowed to vote at contract creation / you can only vote once");
+
+        m_candidates[_candidateName].poll++;
+        m_voterHasNotYetVotedWithCodeHash[voterCodeHash] = false;
     }
 
-    //for organiser
-    function addNewExternality(uint _candidateId, uint _externality) checksCandidateId onlyOwner public{
+    //warning: doesn't check if candidate actually exists
+    function addNewExternality(bytes32 _candidateName, uint _externality) onlyOwner mustBeBeforeEndTime public{
         require(externalitiesEnabled, "externalities must be enabled at ballot creation");
 
-        m_candidateExternality[_candidateId] += _externality;
+        m_candidates[_candidateName].externality += _externality;
     }
 }
