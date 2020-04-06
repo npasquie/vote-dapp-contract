@@ -1,0 +1,16 @@
+{
+  "name": "vote-dapp-contract",
+  "version": "1.0.0",
+  "description": "solidity contract and truffle configuration of the vote-dapp project",
+  "main": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "npasquie",
+  "dependencies": {
+    "chai": "^4.2.0",
+    "truffle": "^5.1.14",
+    "web3": "^1.2.6"
+  }
+}
