@@ -1,5 +1,12 @@
 pragma solidity >=0.4.22 <0.6.0;
 
+/* naming conventions used :
+ camelCase
+ s_<var_name> for structs
+ m_<var_name> for mappings
+ _<var_name> for parameters
+ */
+
 contract Ballot {
     //contract variables
     address owner;
