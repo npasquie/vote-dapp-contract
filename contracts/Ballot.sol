@@ -7,6 +7,7 @@ contract Ballot {
     bytes32 question;
     uint endTime; //time after which no vote can be registered anymore, based on unix epoch
     mapping (bytes32 => bool) m_voterHasVotedWithCodeHash; //hash of the voter's secret code => status (voted or not)
+    mapping (bytes32 => bool) m_voterIsAllowed; //hash of the voter's secret code => status (can vote or not)
     bool externalitiesEnabled; //to create ballots without controversial externalities
     uint numberOfCandidates; //actually useful
     mapping (uint => s_candidate) m_candidates; //id to candidates
@@ -32,6 +33,9 @@ contract Ballot {
         name = _name;
         question = _question;
         endTime = _endTime;
+        for (uint i = 0; i < _votersHashes.length; i++){
+            m_voterIsAllowed[_votersHashes[i]] = true;
+        }
         externalitiesEnabled = _externalitiesEnabled;
         numberOfCandidates = 0; //used as iterator, last value after last while loop will be correct
         while (numberOfCandidates < _candidates.length){
@@ -111,11 +115,14 @@ contract Ballot {
     }
 
     //for voters
-    function vote(uint _candidateId, bytes32 _voter_code) checksCandidateId mustBeBeforeEndTime public{
-        require(! m_voterHasVotedWithCodeHash[keccak256(_voter_code)], "you can only vote once");
+    function vote(uint _candidateId, bytes32 _voterCode) checksCandidateId mustBeBeforeEndTime public{
+        bytes32 memory voterCodeHash = keccak256(_voterCode);
+
+        require(m_voterIsAllowed[voterCodeHash], "you must be allowed to vote");
+        require(! m_voterHasVotedWithCodeHash[voterCodeHash], "you can only vote once");
 
         m_candidate_poll[_candidateId]++;
-        m_voterHasVotedWithCodeHash[keccak256(_voter_code)] = true;
+        m_voterHasVotedWithCodeHash[keccak256(_voterCode)] = true;
     }
 
     //for organiser
