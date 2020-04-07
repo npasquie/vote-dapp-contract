@@ -120,7 +120,7 @@ contract Ballot {
     //warning: doesn't check if candidate actually exists
     function vote(bytes32 _candidateName, bytes32 _voterCode)
       mustBeBeforeEndTime public{
-        bytes32 voterCodeHash = keccak256(abi.encodePacked(_voterCode));
+        bytes32 voterCodeHash = keccak256(abi.encode(_voterCode));
 
         require(m_voterHasNotYetVotedWithCodeHash[voterCodeHash],
             "you must be allowed to vote / can only vote once");
