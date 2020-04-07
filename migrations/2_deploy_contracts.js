@@ -1,5 +1,5 @@
 var Ballot = artifacts.require("./Ballot.sol");
-let misc = require("../misc/ballot-args-handler");
+let misc = require("../misc/ballot-utils");
 
 module.exports = async function(deployer) {
   deployer.deploy(Ballot,...misc.ballotArgsHandler(

@@ -29,10 +29,7 @@ module.exports = {
   },
 
   bytes32ToStr: function (str) {
-    let ret;
-    ret = web3.utils.bytesToHex(str);
-    ret = web3.utils.hexToString(ret);
-    return ret;
+    return web3.utils.hexToUtf8(str);
   },
 
   strListToListBytes32: function (list) {
