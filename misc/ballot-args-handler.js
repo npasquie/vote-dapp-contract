@@ -28,10 +28,25 @@ module.exports = {
     return ret.slice(0, 32);
   },
 
+  bytes32ToStr: function (str) {
+    let ret;
+    ret = web3.utils.bytesToHex(str);
+    ret = web3.utils.hexToString(ret);
+    return ret;
+  },
+
   strListToListBytes32: function (list) {
     let ret = [];
     list.forEach((el, i) => {
       ret[i] = this.strToBytes32(el);
+    });
+    return ret;
+  },
+
+  listBytes32ToListStr: function (list) {
+    let ret = [];
+    list.forEach((el,i) => {
+      ret[i] = this.bytes32ToStr(el);
     });
     return ret;
   },

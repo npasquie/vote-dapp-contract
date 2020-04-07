@@ -4,7 +4,7 @@
   "description": "solidity contract and truffle configuration of the vote-dapp project",
   "main": "",
   "scripts": {
-    "test": "truffle test test/ballot.js"
+    "test": "truffle test"
   },
   "keywords": [],
   "author": "npasquie",
