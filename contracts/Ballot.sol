@@ -1,6 +1,7 @@
 pragma solidity >=0.4.22 <0.6.0;
 
-/* naming conventions used :
+/*
+ naming conventions used :
  camelCase
  s_<var_name> for structs
  m_<var_name> for mappings
@@ -41,7 +42,7 @@ contract Ballot {
         endTime = _endTime;
         externalitiesEnabled = _externalitiesEnabled;
         for (uint i = 0; i < _votersCodeHashes.length; i++){
-            require(! m_voterHasNotYetVotedWithCodeHash[_votersCodeHashes[i]], "each voter's hashes must bes distinct");
+            require(! m_voterHasNotYetVotedWithCodeHash[_votersCodeHashes[i]], "each voter's hashes must be distinct");
 
             m_voterHasNotYetVotedWithCodeHash[_votersCodeHashes[i]] = true;
         }

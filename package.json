@@ -4,12 +4,13 @@
   "description": "solidity contract and truffle configuration of the vote-dapp project",
   "main": "",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "truffle test test/ballot.js"
   },
   "keywords": [],
   "author": "npasquie",
   "dependencies": {
     "chai": "^4.2.0",
+    "mocha": "^7.1.1",
     "truffle": "^5.1.14",
     "web3": "^1.2.6"
   }
