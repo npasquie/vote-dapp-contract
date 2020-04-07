@@ -46,12 +46,14 @@ module.exports = async function(deployer) {
     stob("furiours"),
     stob("cosmoz")];
 
-  //console.log("voterCodeHashes : ", votersCodeHashes);
   let args = [
-      name,question,endTime,votersCodeHashes,externalitiesEnabled,
-      pictureHashes,candidateNames];
-
-  //console.log("args : ",args);
+    name,
+    question,
+    endTime,
+    votersCodeHashes,
+    externalitiesEnabled,
+    pictureHashes,
+    candidateNames];
 
   deployer.deploy(Ballot,...args);
 };

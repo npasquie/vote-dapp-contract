@@ -57,6 +57,7 @@ contract Ballot {
 
             m_voterHasNotYetVotedWithCodeHash[_votersCodeHashes[i]] = true;
         }
+        candidateNames = new bytes32[](_candidateNames.length);
         for (uint i = 0; i < _candidateNames.length; i++){
             require(_candidateNames[i][0] != 0,
               "every candidate must have a defined name");

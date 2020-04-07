@@ -38,11 +38,16 @@ contract("Ballot", (accounts) => {
         let candidateNames = [
           stob("unchained"),
           stob("furiours"),
-          stob("cosmoz")]
+          stob("cosmoz")];
 
-        const ballotInstance = await Ballot.new(
-          [name,question,endTime,votersCodeHashes,externalitiesEnabled,
-          pictureHashes,candidateNames]);
+        const ballotInstance = await Ballot.new([
+          name,
+          question,
+          endTime,
+          votersCodeHashes,
+          externalitiesEnabled,
+          pictureHashes,
+          candidateNames]);
 
         const names = await ballotInstance.getCandidateNames();
         assert.equal(names,candidateNames,
