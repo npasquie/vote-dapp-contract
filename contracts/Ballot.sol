@@ -11,6 +11,7 @@ pragma solidity >=0.4.22 <0.6.0;
 
 contract Ballot {
     //contract variables
+    
     address owner;
     bytes32 name;
     bytes32 question;
@@ -26,7 +27,7 @@ contract Ballot {
     //structs definition
     struct s_candidate {
         uint poll; //number of votes
-        uint externality; //for penalties or bonus, often used at ISEP
+        int externality; //for penalties or bonus, often used at ISEP
         bytes32 pictureHash; //optional
     }
 
@@ -84,13 +85,13 @@ contract Ballot {
 
     //getters
     function getCandidateScore(bytes32 _candidateName)
-      public view returns(uint){
-        return m_candidates[_candidateName].poll +
+      public view returns(int){
+        return int(m_candidates[_candidateName].poll) +
           m_candidates[_candidateName].externality;
     }
 
     function getCandidateExternality(bytes32 _candidateName)
-      public view returns(uint){
+      public view returns(int){
         return m_candidates[_candidateName].externality;
     }
 
@@ -130,7 +131,7 @@ contract Ballot {
     }
 
     //warning: doesn't check if candidate actually exists
-    function addNewExternality(bytes32 _candidateName, uint _externality)
+    function addNewExternality(bytes32 _candidateName, int _externality)
       onlyOwner mustBeBeforeEndTime public{
         require(externalitiesEnabled,
           "externalities must be enabled at ballot creation");

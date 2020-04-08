@@ -9,6 +9,7 @@
   "keywords": [],
   "author": "npasquie",
   "dependencies": {
+    "bignumber": "^1.1.0",
     "chai": "^4.2.0",
     "mocha": "^7.1.1",
     "truffle": "^5.1.14",
