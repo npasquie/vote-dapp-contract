@@ -8,9 +8,20 @@ async function deployStandardBallot(){
     return await Ballot.deployed();
 }
 
-contract("Ballot", (accounts) => {
-    it("...should deploy in general case", async () => {
+const expectThrowsAsync = async (method) => {
+  let error = null;
+  try {
+    await method();
+  }
+  catch (err) {
+    error = err;
+  }
+  expect(error).to.be.an('Error');
+};
 
+contract("Ballot", (accounts) => {
+
+    it("...should deploy in general case", async () => {
         let bI = await deployStandardBallot();
         const names = m.listBytes32ToListStr(await bI.getCandidateNames.call());
         assert.equal(names[1],"furiours",
@@ -32,15 +43,13 @@ contract("Ballot", (accounts) => {
     });
 
     it("...should't allow to vote twice", async () => {
-        let bI = await deployStandardBallot();
-        let code = m.strToBytes32("code2");
-        let cand = m.strToBytes32("cosmoz");
-        await bI.vote(cand,code,{from:accounts[0]});
-        // await bI.vote(cand,code,{from:accounts[0]});
-        // let voteCount = await bI.getCandidateScore.call(cand);
-        // voteCount = voteCount.toNumber();
-        let f = async () => {await bI.vote(cand,code,{from:accounts[0]});};
-        assert.throws(f,"voters should be able to vote only once");
+        expectThrowsAsync(async ()=>{
+          let bI = await deployStandardBallot();
+          let code = m.strToBytes32("code2");
+          let cand = m.strToBytes32("cosmoz");
+          await bI.vote(cand,code,{from:accounts[0]});
+          await bI.vote(cand,code,{from:accounts[0]});
+        });
     });
 
     it("...should register externalities", async () => {
@@ -53,11 +62,10 @@ contract("Ballot", (accounts) => {
     });
 
     it("...should NOT register externalities if sender is not owner", async () => {
-        let bI = await deployStandardBallot();
-        let cand = m.strToBytes32("cosmoz");
-        await bI.addNewExternality(cand,-2,{from:accounts[1]});
-        //let externality = await bI.getExternality.call(cand);
-        //externality = externality.toNumber();
-        assert.fail(await bI.getExternality.call(cand),"only the owner should be able to register externalities");
+        expectThrowsAsync(async ()=>{
+            let bI = await deployStandardBallot();
+            let cand = m.strToBytes32("cosmoz");
+            await bI.addNewExternality(cand,-2,{from:accounts[1]});
+        });
     });
 });

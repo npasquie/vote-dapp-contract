@@ -11,7 +11,7 @@ pragma solidity >=0.4.22 <0.6.0;
 
 contract Ballot {
     //contract variables
-    
+
     address owner;
     bytes32 name;
     bytes32 question;
