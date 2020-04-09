@@ -68,7 +68,7 @@ contract Ballot {
         }
     }
 
-    //contract core code
+    //contract core
 
     //modifiers
     modifier onlyOwner(){

@@ -1,8 +1,6 @@
 let assert = require("assert");
 const Ballot = artifacts.require("../build/Ballot");
 let m = require("../misc/ballot-utils");
-// let web3 = require("web3");
-// let bignumber = require("bignumber");
 
 async function deployStandardBallot(){
     return await Ballot.deployed();
@@ -20,7 +18,6 @@ const expectThrowsAsync = async (method) => {
 };
 
 contract("Ballot", (accounts) => {
-
     it("...should deploy in general case", async () => {
         let bI = await deployStandardBallot();
         const names = m.listBytes32ToListStr(await bI.getCandidateNames.call());
@@ -61,8 +58,8 @@ contract("Ballot", (accounts) => {
         assert.equal(voteCount,-2,"externalities must be registered");
     });
 
-    it("...should NOT register externalities if sender is not owner", async () => {
-        expectThrowsAsync(async ()=>{
+    it("...should NOT register externalities if sender is not owner",
+      async () => {expectThrowsAsync(async ()=>{
             let bI = await deployStandardBallot();
             let cand = m.strToBytes32("cosmoz");
             await bI.addNewExternality(cand,-2,{from:accounts[1]});
