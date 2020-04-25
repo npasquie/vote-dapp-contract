@@ -34,7 +34,6 @@ contract("Ballot", (accounts) => {
         await bI.vote(cand,code,{from:accounts[0]});
         let voteCount2 = await bI.getCandidateScore.call(cand);
         voteCount2 = voteCount2.toNumber();
-
         assert.equal(voteCount2, voteCount + 1,
             "voting must add 1 to the candidate score");
     });
