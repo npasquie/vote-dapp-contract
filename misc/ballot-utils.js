@@ -1,11 +1,10 @@
 const web3 = require("web3");
 
-//I actually should have used web3.abi.encode<...> instead of all this shit
 module.exports = {
   ballotArgsHandler: function (
         name,
         question,
-        endTime,
+        endTime, // provide a Date object to this arg
         votersCodeHashes,
         externalitiesEnabled,
         pictureHashes,
@@ -14,10 +13,16 @@ module.exports = {
     return [
       this.strToBytes32(name),
       this.strToBytes32(question),
-      endTime,
+      /* getTime gives unix epoch in milliseconds, we convert it in seconds as
+      used by solidity */
+      Math.floor(endTime.getTime() / 1000),
       this.hashListToListBytes32(votersCodeHashes),
       externalitiesEnabled,
-      this.hashListToListBytes32(pictureHashes),
+      this.hashListToListBytes32( // if no pictures, put a placeholder hash
+          pictureHashes ?
+              pictureHashes :
+              new Array(candidateNames.length).fill(web3.utils.utf8ToHex("R"))
+      ),
       this.strListToListBytes32(candidateNames)
     ];
   },
@@ -46,7 +51,7 @@ module.exports = {
     list.forEach((el, i) => {
       ret[i] = web3.utils.hexToBytes(el);
     });
-    return(ret);
+    return (ret);
   },
 
   listBytes32ToListStr: function (list) {
