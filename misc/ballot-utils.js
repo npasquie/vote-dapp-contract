@@ -1,4 +1,4 @@
-let web3 = require("web3");
+const web3 = require("web3");
 
 //I actually should have used web3.abi.encode<...> instead of all this shit
 module.exports = {
