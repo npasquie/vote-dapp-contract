@@ -5,7 +5,7 @@ module.exports = async function(deployer) {
   deployer.deploy(Ballot,...misc.ballotArgsHandler(
       "vote 1",
       "pour qui tu votes ?",
-      Date.now() + 86400,
+      new Date("December 17, 2023 03:24:00"),
       [misc.strToHash("code1"),
         misc.strToHash("code2"),
         misc.strToHash("code3")],
